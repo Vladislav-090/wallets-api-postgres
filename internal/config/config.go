@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Server   ServerConfig
 	Database DataBaseConfig
+	JWT      JWTSConfig
 }
 
 type ServerConfig struct {
@@ -22,6 +23,10 @@ type DataBaseConfig struct {
 	Password string
 	Name     string
 	SSLMode  string
+}
+
+type JWTSConfig struct {
+	Secret string
 }
 
 func Load() (*Config, error) {
@@ -42,6 +47,10 @@ func Load() (*Config, error) {
 			Password: os.Getenv("POSTGRES_PASSWORD"),
 			Name:     os.Getenv("POSTGRES_DB"),
 			SSLMode:  "disable",
+		},
+
+		JWT: JWTSConfig{
+			Secret: os.Getenv("JWT_SECRET"),
 		},
 	}
 	return cfg, nil

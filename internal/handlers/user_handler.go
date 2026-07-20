@@ -51,3 +51,28 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteJSON(w, http.StatusCreated, createdUser)
 }
+
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+
+	var input models.LoginInput
+
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+
+	tokenString, err := h.userService.Login(input)
+	if errors.Is(err, service.ErrInvalidCredentials) {
+		response.WriteError(w, http.StatusUnauthorized, "invalid email or password")
+		return
+	}
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "internal server error")
+		return
+	}
+	response.WriteJSON(w, http.StatusOK, map[string]string{
+		"token": tokenString,
+	})
+
+}

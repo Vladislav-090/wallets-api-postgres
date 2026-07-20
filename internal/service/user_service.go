@@ -3,6 +3,7 @@ package service
 import (
 	"database/sql"
 	"errors"
+	"wallets-api-postgres/internal/auth"
 	"wallets-api-postgres/internal/models"
 	"wallets-api-postgres/internal/repository"
 
@@ -14,15 +15,20 @@ var (
 	ErrPasswordRequired   = errors.New("password is required")
 	ErrPasswordTooShort   = errors.New("password must be at least 8 characters")
 	ErrEmailAlreadyExists = errors.New("email already exists")
+	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
 type UserService struct {
 	userRepository *repository.UserRepository
+	jwtSecret      string
 }
 
-func NewUserService(userRepository *repository.UserRepository) *UserService {
+func NewUserService(userRepository *repository.UserRepository,
+	jwtSecret string,
+) *UserService {
 	return &UserService{
 		userRepository: userRepository,
+		jwtSecret:      jwtSecret,
 	}
 }
 
@@ -49,7 +55,7 @@ func (s *UserService) CreateUser(input models.RegisterInput) (*models.User, erro
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.New("failed to hashing password!")
+		return nil, errors.New("failed to hash password")
 	}
 
 	user := models.User{
@@ -64,4 +70,39 @@ func (s *UserService) CreateUser(input models.RegisterInput) (*models.User, erro
 	}
 
 	return &createdUser, nil
+}
+
+func (u *UserService) Login(loginInput models.LoginInput) (string, error) {
+	if loginInput.Email == "" {
+		return "", ErrInvalidCredentials
+	}
+
+	if loginInput.Password == "" {
+		return "", ErrInvalidCredentials
+	}
+
+	user, err := u.userRepository.GetUserByEmail(loginInput.Email)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", ErrInvalidCredentials
+	}
+	if err != nil {
+		return "", err
+	}
+
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(loginInput.Password),
+	)
+
+	if err != nil {
+		return "", ErrInvalidCredentials
+	}
+
+	tokenString, err := auth.GenerateToken(user, u.jwtSecret)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+
 }

@@ -10,6 +10,7 @@ func New(userHandler *handlers.UserHandler) http.Handler {
 
 	mux.HandleFunc("/health", handlers.HealthCheck)
 	mux.HandleFunc("/users", userHandler.CreateUser)
+	mux.HandleFunc("POST /login", userHandler.Login)
 
 	return mux
 }

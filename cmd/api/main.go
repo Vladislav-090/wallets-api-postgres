@@ -25,7 +25,7 @@ func main() {
 	defer db.Close()
 
 	userRepository := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository, cfg.JWT.Secret)
 	userHandler := handlers.NewUserHandler(userService)
 
 	appRouter := router.New(userHandler)
