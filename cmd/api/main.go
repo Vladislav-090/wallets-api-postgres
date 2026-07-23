@@ -32,9 +32,14 @@ func main() {
 	walletService := service.NewWalletService(walletRepository)
 	walletHandler := handlers.NewWalletHandler(walletService)
 
+	transferRepository := repository.NewTransferRepository(db)
+	transferService := service.NewTransferService(transferRepository)
+	transferHandler := handlers.NewTransferHandler(transferService)
+
 	appRouter := router.New(
 		userHandler,
 		walletHandler,
+		transferHandler,
 		cfg.JWT.Secret,
 	)
 

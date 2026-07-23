@@ -7,6 +7,7 @@ import (
 
 func New(userHandler *handlers.UserHandler,
 	walletHandler *handlers.WalletHandler,
+	transferHandlder *handlers.TransferHandler,
 	secret string,
 ) http.Handler {
 	mux := http.NewServeMux()
@@ -15,6 +16,7 @@ func New(userHandler *handlers.UserHandler,
 
 	UserRouterRegister(mux, userHandler)
 	WalletRouterRegister(mux, walletHandler, secret)
+	TransferRouterRegister(mux, transferHandlder, secret)
 
 	return mux
 }

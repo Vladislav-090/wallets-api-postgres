@@ -4,6 +4,8 @@ import (
 	"errors"
 	"wallets-api-postgres/internal/models"
 	"wallets-api-postgres/internal/repository"
+
+	"github.com/shopspring/decimal"
 )
 
 type WalletService struct {
@@ -34,7 +36,7 @@ func (w *WalletService) CreateWallet(userID int64, input models.WalletInput) (*m
 		UserID:   userID,
 		Name:     input.Name,
 		Currency: input.Currency,
-		Balance:  0,
+		Balance:  decimal.Zero,
 	}
 
 	createdWallet, err := w.repo.CreateWallet(wallet)
