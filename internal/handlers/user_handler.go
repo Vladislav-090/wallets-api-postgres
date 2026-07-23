@@ -21,10 +21,6 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var input models.RegisterInput
-	if r.Method != http.MethodPost {
-		response.WriteError(w, http.StatusMethodNotAllowed, "method not allowed")
-		return
-	}
 
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {

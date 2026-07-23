@@ -11,3 +11,12 @@ type Wallet struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type WalletInput struct {
+	Name     string `json:"name"`
+	Currency string `json:"currency"`
+}
+
+type UpdateWalletInput struct {
+	Name string `json:"name"`
+}

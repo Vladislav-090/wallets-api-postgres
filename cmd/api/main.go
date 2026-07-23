@@ -28,7 +28,15 @@ func main() {
 	userService := service.NewUserService(userRepository, cfg.JWT.Secret)
 	userHandler := handlers.NewUserHandler(userService)
 
-	appRouter := router.New(userHandler)
+	walletRepository := repository.NewWalletRepository(db)
+	walletService := service.NewWalletService(walletRepository)
+	walletHandler := handlers.NewWalletHandler(walletService)
+
+	appRouter := router.New(
+		userHandler,
+		walletHandler,
+		cfg.JWT.Secret,
+	)
 
 	address := ":" + cfg.Server.Port
 

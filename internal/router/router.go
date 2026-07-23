@@ -5,12 +5,16 @@ import (
 	"wallets-api-postgres/internal/handlers"
 )
 
-func New(userHandler *handlers.UserHandler) http.Handler {
+func New(userHandler *handlers.UserHandler,
+	walletHandler *handlers.WalletHandler,
+	secret string,
+) http.Handler {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/health", handlers.HealthCheck)
-	mux.HandleFunc("/users", userHandler.CreateUser)
-	mux.HandleFunc("POST /login", userHandler.Login)
+	mux.HandleFunc("GET /health", handlers.HealthCheck)
+
+	UserRouterRegister(mux, userHandler)
+	WalletRouterRegister(mux, walletHandler, secret)
 
 	return mux
 }
