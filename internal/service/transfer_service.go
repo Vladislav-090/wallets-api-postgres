@@ -30,3 +30,11 @@ func (s *TransferService) CreateTransfer(
 		amount,
 	)
 }
+
+func (s *TransferService) GetTransfers(userID int64) ([]models.Transfer, error) {
+	return s.transferRepository.GetTransfers(userID)
+}
+
+func (s *TransferService) GetTransferByID(transferID int64, userID int64) (models.Transfer, error) {
+	return s.transferRepository.GetTransferByID(transferID, userID)
+}

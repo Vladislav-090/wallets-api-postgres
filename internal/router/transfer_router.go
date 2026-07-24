@@ -14,4 +14,20 @@ func TransferRouterRegister(mux *http.ServeMux, transferHandler *handlers.Transf
 			http.HandlerFunc(transferHandler.CreateTransfer),
 		),
 	)
+
+	mux.Handle(
+		"GET /transfers",
+		middleware.AuthMiddleware(
+			secret,
+			http.HandlerFunc(transferHandler.GetTransfers),
+		),
+	)
+
+	mux.Handle(
+		"GET /transfers/{id}",
+		middleware.AuthMiddleware(
+			secret,
+			http.HandlerFunc(transferHandler.GetTransferByID),
+		),
+	)
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"wallets-api-postgres/internal/middleware"
 	"wallets-api-postgres/internal/models"
 	"wallets-api-postgres/internal/repository"
@@ -80,4 +81,48 @@ func (h *TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	response.WriteJSON(w, http.StatusCreated, transfer)
+}
+
+func (h *TransferHandler) GetTransfers(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middleware.GetClaims(r.Context())
+	if !ok {
+		response.WriteError(w, http.StatusUnauthorized, "failed to get userID")
+		return
+	}
+	transfers, err := h.transferService.GetTransfers(claims.UserID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to get transfers")
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, transfers)
+}
+
+func (h *TransferHandler) GetTransferByID(w http.ResponseWriter, r *http.Request) {
+	claims, ok := middleware.GetClaims(r.Context())
+	if !ok {
+		response.WriteError(w, http.StatusUnauthorized, "failed to get userID")
+		return
+	}
+
+	idParam := r.PathValue("id")
+
+	idInt, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid transfer id")
+		return
+	}
+
+	transfer, err := h.transferService.GetTransferByID(idInt, claims.UserID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			response.WriteError(w, http.StatusNotFound, "transfer not found")
+			return
+		}
+		response.WriteError(w, http.StatusInternalServerError, "failed to get transfer")
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, transfer)
+
 }

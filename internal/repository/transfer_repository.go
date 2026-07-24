@@ -149,3 +149,84 @@ func (t *TransferRepository) CreateTransfer(userID int64,
 
 	return transfer, nil
 }
+
+func (t *TransferRepository) GetTransfers(userID int64) ([]models.Transfer, error) {
+	query := `
+	SELECT
+	tr.id,
+	tr.from_wallet_id,
+	tr.to_wallet_id,
+	tr.amount,
+	tr.status,
+	tr.created_at
+	FROM transfers AS tr
+	JOIN wallets AS fw
+		ON fw.id = tr.from_wallet_id
+	JOIN wallets AS tw
+		ON tw.id = tr.to_wallet_id
+	WHERE fw.user_id = $1 OR tw.user_id = $1
+	ORDER BY tr.created_at  DESC`
+
+	rows, err := t.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	transfers := make([]models.Transfer, 0)
+
+	for rows.Next() {
+		var transfer models.Transfer
+
+		err = rows.Scan(
+			&transfer.ID,
+			&transfer.FromWalletID,
+			&transfer.ToWalletID,
+			&transfer.Amount,
+			&transfer.Status,
+			&transfer.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		transfers = append(transfers, transfer)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return transfers, nil
+}
+
+func (t *TransferRepository) GetTransferByID(transferID int64, userID int64) (models.Transfer, error) {
+	query := `SELECT
+	tr.id,
+	tr.from_wallet_id,
+	tr.to_wallet_id,
+	tr.amount,
+	tr.status,
+	tr.created_at
+	FROM transfers AS tr
+	JOIN wallets AS fw
+		ON fw.id = tr.from_wallet_id
+	JOIN wallets AS tw
+		ON tw.id = tr.to_wallet_id
+	WHERE tr.id = $1
+		AND (fw.user_id = $2 OR tw.user_id = $2)
+	`
+	var transfer models.Transfer
+
+	err := t.db.QueryRow(query, transferID, userID).Scan(
+		&transfer.ID,
+		&transfer.FromWalletID,
+		&transfer.ToWalletID,
+		&transfer.Amount,
+		&transfer.Status,
+		&transfer.CreatedAt,
+	)
+	if err != nil {
+		return models.Transfer{}, err
+	}
+
+	return transfer, nil
+}
