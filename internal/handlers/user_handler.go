@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"wallets-api-postgres/internal/models"
 	"wallets-api-postgres/internal/response"
 	"wallets-api-postgres/internal/service"
@@ -71,4 +73,35 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		"token": tokenString,
 	})
 
+}
+
+func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.userService.GetUsers()
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to get users")
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, users)
+}
+
+func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	idParam := r.PathValue("id")
+	userID, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil || userID <= 0 {
+		response.WriteError(w, http.StatusBadRequest, "invalid id")
+		return
+	}
+
+	user, err := h.userService.GetUserByID(userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			response.WriteError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		response.WriteError(w, http.StatusInternalServerError, "failed to get user")
+		return
+
+	}
+	response.WriteJSON(w, http.StatusOK, user)
 }

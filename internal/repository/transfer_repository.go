@@ -230,3 +230,65 @@ func (t *TransferRepository) GetTransferByID(transferID int64, userID int64) (mo
 
 	return transfer, nil
 }
+
+func (t *TransferRepository) GetAllTransfers() ([]models.Transfer, error) {
+	query := `
+	SELECT id, from_wallet_id, to_wallet_id, amount, status, created_at
+	FROM transfers
+	ORDER BY created_at DESC`
+
+	rows, err := t.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	transfers := make([]models.Transfer, 0)
+
+	for rows.Next() {
+		var transfer models.Transfer
+		err = rows.Scan(
+			&transfer.ID,
+			&transfer.FromWalletID,
+			&transfer.ToWalletID,
+			&transfer.Amount,
+			&transfer.Status,
+			&transfer.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		transfers = append(transfers, transfer)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return transfers, nil
+
+}
+
+func (t *TransferRepository) GetTransferByIDForAdmin(transferID int64) (models.Transfer, error) {
+	query := `
+	SELECT id, from_wallet_id, to_wallet_id, amount, status, created_at
+	FROM transfers
+	WHERE id = $1
+	`
+
+	var transfer models.Transfer
+
+	err := t.db.QueryRow(query, transferID).Scan(
+		&transfer.ID,
+		&transfer.FromWalletID,
+		&transfer.ToWalletID,
+		&transfer.Amount,
+		&transfer.Status,
+		&transfer.CreatedAt,
+	)
+	if err != nil {
+		return models.Transfer{}, err
+	}
+
+	return transfer, nil
+}

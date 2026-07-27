@@ -38,3 +38,11 @@ func (s *TransferService) GetTransfers(userID int64) ([]models.Transfer, error) 
 func (s *TransferService) GetTransferByID(transferID int64, userID int64) (models.Transfer, error) {
 	return s.transferRepository.GetTransferByID(transferID, userID)
 }
+
+func (s *TransferService) GetAllTransfers() ([]models.Transfer, error) {
+	return s.transferRepository.GetAllTransfers()
+}
+
+func (s *TransferService) GetTransferByIDForAdmin(transferID int64) (models.Transfer, error) {
+	return s.transferRepository.GetTransferByIDForAdmin(transferID)
+}

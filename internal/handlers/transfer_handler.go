@@ -126,3 +126,34 @@ func (h *TransferHandler) GetTransferByID(w http.ResponseWriter, r *http.Request
 	response.WriteJSON(w, http.StatusOK, transfer)
 
 }
+
+func (h *TransferHandler) GetAllTransfers(w http.ResponseWriter, r *http.Request) {
+	transfers, err := h.transferService.GetAllTransfers()
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to get transfers")
+		return
+	}
+	response.WriteJSON(w, http.StatusOK, transfers)
+}
+
+func (h *TransferHandler) GetTransferByIDForAdmin(w http.ResponseWriter, r *http.Request) {
+	idParam := r.PathValue("id")
+
+	transferID, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil || transferID <= 0 {
+		response.WriteError(w, http.StatusBadRequest, "invalid transfer id")
+		return
+	}
+
+	transfer, err := h.transferService.GetTransferByIDForAdmin(transferID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			response.WriteError(w, http.StatusNotFound, "transfer not found")
+			return
+		}
+		response.WriteError(w, http.StatusInternalServerError, "failed to get transfer")
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, transfer)
+}

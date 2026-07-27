@@ -83,3 +83,30 @@ func (w *WalletService) DeleteWallet(walletID int64, userID int64) error {
 
 	return nil
 }
+
+func (w *WalletService) GetAllWallets() ([]models.Wallet, error) {
+	wallets, err := w.repo.GetAllWallets()
+	if err != nil {
+		return nil, err
+	}
+
+	return wallets, nil
+}
+
+func (w *WalletService) GetWalletsByUserID(userID int64) ([]models.Wallet, error) {
+	wallets, err := w.repo.GetWalletsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return wallets, nil
+}
+
+func (w *WalletService) GetWalletByIDForAdmin(walletID int64) (models.Wallet, error) {
+	wallet, err := w.repo.GetWalletByIDForAdmin(walletID)
+	if err != nil {
+		return models.Wallet{}, err
+	}
+
+	return wallet, nil
+}

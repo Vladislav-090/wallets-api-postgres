@@ -7,16 +7,16 @@ import (
 
 func New(userHandler *handlers.UserHandler,
 	walletHandler *handlers.WalletHandler,
-	transferHandlder *handlers.TransferHandler,
+	transferHandler *handlers.TransferHandler,
 	secret string,
 ) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", handlers.HealthCheck)
 
-	UserRouterRegister(mux, userHandler)
+	UserRouterRegister(mux, userHandler, secret)
 	WalletRouterRegister(mux, walletHandler, secret)
-	TransferRouterRegister(mux, transferHandlder, secret)
+	TransferRouterRegister(mux, transferHandler, secret)
 
 	return mux
 }

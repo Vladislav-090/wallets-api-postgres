@@ -106,3 +106,11 @@ func (u *UserService) Login(loginInput models.LoginInput) (string, error) {
 	return tokenString, nil
 
 }
+
+func (u *UserService) GetUsers() ([]models.User, error) {
+	return u.userRepository.GetUsers()
+}
+
+func (u *UserService) GetUserByID(userID int64) (models.User, error) {
+	return u.userRepository.GetUserByID(userID)
+}

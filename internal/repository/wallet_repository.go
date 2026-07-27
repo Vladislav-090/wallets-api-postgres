@@ -156,3 +156,108 @@ func (w *WalletRepository) DeleteWallet(walletID int64, userID int64) error {
 
 	return nil
 }
+
+func (w *WalletRepository) GetAllWallets() ([]models.Wallet, error) {
+	query := `
+	SELECT 	id, user_id, name, currency, balance, created_at, updated_at
+	FROM wallets
+	ORDER BY user_id ASC, created_at DESC`
+
+	rows, err := w.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	wallets := make([]models.Wallet, 0)
+
+	for rows.Next() {
+		var wallet models.Wallet
+
+		err := rows.Scan(
+			&wallet.ID,
+			&wallet.UserID,
+			&wallet.Name,
+			&wallet.Currency,
+			&wallet.Balance,
+			&wallet.CreatedAt,
+			&wallet.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		wallets = append(wallets, wallet)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return wallets, nil
+}
+
+func (w *WalletRepository) GetWalletsByUserID(userID int64) ([]models.Wallet, error) {
+	query := `
+	SELECT id, user_id, name, currency, balance, created_at, updated_at
+	FROM wallets
+	WHERE user_id = $1
+	ORDER BY created_at DESC`
+
+	rows, err := w.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	wallets := make([]models.Wallet, 0)
+
+	for rows.Next() {
+		var wallet models.Wallet
+		err = rows.Scan(
+			&wallet.ID,
+			&wallet.UserID,
+			&wallet.Name,
+			&wallet.Currency,
+			&wallet.Balance,
+			&wallet.CreatedAt,
+			&wallet.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		wallets = append(wallets, wallet)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return wallets, nil
+}
+
+func (w *WalletRepository) GetWalletByIDForAdmin(walletID int64) (models.Wallet, error) {
+	query := `
+	SELECT id, user_id, name, currency, balance, created_at, updated_at
+	FROM wallets
+	WHERE id = $1`
+
+	var wallet models.Wallet
+
+	err := w.db.QueryRow(query,
+		walletID,
+	).Scan(
+		&wallet.ID,
+		&wallet.UserID,
+		&wallet.Name,
+		&wallet.Currency,
+		&wallet.Balance,
+		&wallet.CreatedAt,
+		&wallet.UpdatedAt,
+	)
+	if err != nil {
+		return models.Wallet{}, err
+	}
+
+	return wallet, nil
+
+}

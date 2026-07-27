@@ -46,4 +46,34 @@ func WalletRouterRegister(mux *http.ServeMux, walletHandler *handlers.WalletHand
 			http.HandlerFunc(walletHandler.DeleteWallet),
 		),
 	)
+
+	mux.Handle(
+		"GET /admin/wallets",
+		middleware.AuthMiddleware(
+			secret,
+			middleware.AdminMiddleware(
+				http.HandlerFunc(walletHandler.GetAllWallets),
+			),
+		),
+	)
+
+	mux.Handle(
+		"GET /admin/users/{id}/wallets",
+		middleware.AuthMiddleware(
+			secret,
+			middleware.AdminMiddleware(
+				http.HandlerFunc(walletHandler.GetWalletsByUserID),
+			),
+		),
+	)
+
+	mux.Handle(
+		"GET /admin/wallets/{id}",
+		middleware.AuthMiddleware(
+			secret,
+			middleware.AdminMiddleware(
+				http.HandlerFunc(walletHandler.GetWalletByIDForAdmin),
+			),
+		),
+	)
 }

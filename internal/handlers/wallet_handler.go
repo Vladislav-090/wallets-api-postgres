@@ -161,3 +161,55 @@ func (h *WalletHandler) DeleteWallet(w http.ResponseWriter, r *http.Request) {
 		Message: "wallet deleted successfully",
 	})
 }
+
+func (h *WalletHandler) GetAllWallets(w http.ResponseWriter, r *http.Request) {
+	wallets, err := h.walletService.GetAllWallets()
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to get wallets")
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, wallets)
+}
+
+func (h *WalletHandler) GetWalletsByUserID(w http.ResponseWriter, r *http.Request) {
+
+	idParam := r.PathValue("id")
+
+	userID, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil || userID <= 0 {
+		response.WriteError(w, http.StatusBadRequest, "invalid user ID")
+		return
+	}
+
+	wallets, err := h.walletService.GetWalletsByUserID(userID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to get wallets")
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, wallets)
+}
+
+func (h *WalletHandler) GetWalletByIDForAdmin(w http.ResponseWriter, r *http.Request) {
+
+	idParam := r.PathValue("id")
+
+	walletID, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil || walletID <= 0 {
+		response.WriteError(w, http.StatusBadRequest, "invalid wallet ID")
+		return
+	}
+
+	wallet, err := h.walletService.GetWalletByIDForAdmin(walletID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			response.WriteError(w, http.StatusNotFound, "wallet not found")
+			return
+		}
+		response.WriteError(w, http.StatusInternalServerError, "failed to get wallet")
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, wallet)
+}

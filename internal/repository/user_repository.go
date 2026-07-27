@@ -60,3 +60,62 @@ func (u *UserRepository) GetUserByEmail(email string) (models.User, error) {
 
 	return user, nil
 }
+
+func (u *UserRepository) GetUsers() ([]models.User, error) {
+	query := `
+	SELECT id, email, role, created_at, updated_at
+	FROM users
+	ORDER BY created_at DESC`
+
+	rows, err := u.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	users := make([]models.User, 0)
+
+	for rows.Next() {
+		var user models.User
+
+		err := rows.Scan(
+			&user.ID,
+			&user.Email,
+			&user.Role,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (u *UserRepository) GetUserByID(userID int64) (models.User, error) {
+	query := `
+	SELECT id, email, role, created_at, updated_at
+	FROM users
+	WHERE id = $1
+	`
+	var user models.User
+
+	err := u.db.QueryRow(query, userID).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return user, nil
+
+}

@@ -30,4 +30,24 @@ func TransferRouterRegister(mux *http.ServeMux, transferHandler *handlers.Transf
 			http.HandlerFunc(transferHandler.GetTransferByID),
 		),
 	)
+
+	mux.Handle(
+		"GET /admin/transfers",
+		middleware.AuthMiddleware(
+			secret,
+			middleware.AdminMiddleware(
+				http.HandlerFunc(transferHandler.GetAllTransfers),
+			),
+		),
+	)
+
+	mux.Handle(
+		"GET /admin/transfers/{id}",
+		middleware.AuthMiddleware(
+			secret,
+			middleware.AdminMiddleware(
+				http.HandlerFunc(transferHandler.GetTransferByIDForAdmin),
+			),
+		),
+	)
 }
