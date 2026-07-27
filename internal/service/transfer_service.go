@@ -6,7 +6,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type TransferRepository interface{
+type TransferRepository interface {
 	CreateTransfer(userID int64, fromWalletID int64, toWalletID int64, amount decimal.Decimal) (models.Transfer, error)
 	GetTransfers(userID int64) ([]models.Transfer, error)
 	GetTransferByID(transferID int64, userID int64) (models.Transfer, error)
