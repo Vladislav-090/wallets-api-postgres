@@ -3,16 +3,26 @@ package service
 import (
 	"errors"
 	"wallets-api-postgres/internal/models"
-	"wallets-api-postgres/internal/repository"
 
 	"github.com/shopspring/decimal"
 )
 
-type WalletService struct {
-	repo *repository.WalletRepository
+type WalletRepository interface {
+	CreateWallet(wallet models.Wallet) (models.Wallet, error)
+	GetWallets(userID int64) ([]models.Wallet, error)
+	GetWalletByID(walletID int64, userID int64) (models.Wallet, error)
+	UpdateWallet(walletID int64, userID int64, name string) (models.Wallet, error)
+	DeleteWallet(walletID int64, userID int64) error
+	GetAllWallets() ([]models.Wallet, error)
+	GetWalletsByUserID(userID int64) ([]models.Wallet, error)
+	GetWalletByIDForAdmin(walletID int64) (models.Wallet, error)
 }
 
-func NewWalletService(repo *repository.WalletRepository) *WalletService {
+type WalletService struct {
+	repo WalletRepository
+}
+
+func NewWalletService(repo WalletRepository) *WalletService {
 	return &WalletService{
 		repo: repo,
 	}

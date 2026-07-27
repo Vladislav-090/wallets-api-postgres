@@ -5,7 +5,6 @@ import (
 	"errors"
 	"wallets-api-postgres/internal/auth"
 	"wallets-api-postgres/internal/models"
-	"wallets-api-postgres/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,12 +17,19 @@ var (
 	ErrInvalidCredentials = errors.New("invalid email or password")
 )
 
+type UserRepository interface {
+	CreateUser(user models.User) (models.User, error)
+	GetUsers() ([]models.User, error)
+	GetUserByID(userID int64) (models.User, error)
+	GetUserByEmail(userEmail string) (models.User, error)
+}
+
 type UserService struct {
-	userRepository *repository.UserRepository
+	userRepository UserRepository
 	jwtSecret      string
 }
 
-func NewUserService(userRepository *repository.UserRepository,
+func NewUserService(userRepository UserRepository,
 	jwtSecret string,
 ) *UserService {
 	return &UserService{
