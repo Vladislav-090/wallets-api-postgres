@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"wallets-api-postgres/internal/models"
 
 	"github.com/shopspring/decimal"
@@ -24,12 +25,40 @@ func NewTransferService(transferRepository TransferRepository) *TransferService 
 	}
 }
 
+var (
+	ErrInvalidTransferUserID = errors.New("invalid user id")
+	ErrInvalidFromWalletID   = errors.New("invalid from wallet id")
+	ErrInvalidToWalletID     = errors.New("invalid to wallet id")
+	ErrInvalidTransferAmount = errors.New("amount must be greater than zero")
+	ErrSameWallet            = errors.New("cannot transfer to the same wallet")
+)
+
 func (s *TransferService) CreateTransfer(
 	userID int64,
 	fromWalletID int64,
 	toWalletID int64,
 	amount decimal.Decimal,
 ) (models.Transfer, error) {
+
+	if userID <= 0 {
+		return models.Transfer{}, ErrInvalidTransferUserID
+	}
+	if fromWalletID <= 0 {
+		return models.Transfer{}, ErrInvalidFromWalletID
+	}
+
+	if toWalletID <= 0 {
+		return models.Transfer{}, ErrInvalidToWalletID
+	}
+
+	if fromWalletID == toWalletID {
+		return models.Transfer{}, ErrSameWallet
+	}
+
+	if amount.LessThanOrEqual(decimal.Zero) {
+		return models.Transfer{}, ErrInvalidTransferAmount
+	}
+
 	return s.transferRepository.CreateTransfer(
 		userID,
 		fromWalletID,
