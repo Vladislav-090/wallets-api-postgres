@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"wallets-api-postgres/internal/models"
 
@@ -8,14 +9,14 @@ import (
 )
 
 type WalletRepository interface {
-	CreateWallet(wallet models.Wallet) (models.Wallet, error)
-	GetWallets(userID int64) ([]models.Wallet, error)
-	GetWalletByID(walletID int64, userID int64) (models.Wallet, error)
-	UpdateWallet(walletID int64, userID int64, name string) (models.Wallet, error)
-	DeleteWallet(walletID int64, userID int64) error
-	GetAllWallets() ([]models.Wallet, error)
-	GetWalletsByUserID(userID int64) ([]models.Wallet, error)
-	GetWalletByIDForAdmin(walletID int64) (models.Wallet, error)
+	CreateWallet(ctx context.Context, wallet models.Wallet) (models.Wallet, error)
+	GetWallets(ctx context.Context, userID int64) ([]models.Wallet, error)
+	GetWalletByID(ctx context.Context, walletID int64, userID int64) (models.Wallet, error)
+	UpdateWallet(ctx context.Context, walletID int64, userID int64, name string) (models.Wallet, error)
+	DeleteWallet(ctx context.Context, walletID int64, userID int64) error
+	GetAllWallets(ctx context.Context) ([]models.Wallet, error)
+	GetWalletsByUserID(ctx context.Context, userID int64) ([]models.Wallet, error)
+	GetWalletByIDForAdmin(ctx context.Context, walletID int64) (models.Wallet, error)
 }
 
 type WalletService struct {
@@ -33,7 +34,7 @@ var (
 	ErrCurrencyRequired = errors.New("currency is required")
 )
 
-func (w *WalletService) CreateWallet(userID int64, input models.WalletInput) (*models.Wallet, error) {
+func (w *WalletService) CreateWallet(ctx context.Context, userID int64, input models.WalletInput) (*models.Wallet, error) {
 	if input.Name == "" {
 		return nil, ErrNameRequired
 	}
@@ -49,7 +50,7 @@ func (w *WalletService) CreateWallet(userID int64, input models.WalletInput) (*m
 		Balance:  decimal.Zero,
 	}
 
-	createdWallet, err := w.repo.CreateWallet(wallet)
+	createdWallet, err := w.repo.CreateWallet(ctx, wallet)
 	if err != nil {
 		return nil, err
 	}
@@ -58,17 +59,17 @@ func (w *WalletService) CreateWallet(userID int64, input models.WalletInput) (*m
 
 }
 
-func (w *WalletService) GetWallets(userID int64) ([]models.Wallet, error) {
+func (w *WalletService) GetWallets(ctx context.Context, userID int64) ([]models.Wallet, error) {
 
-	wallets, err := w.repo.GetWallets(userID)
+	wallets, err := w.repo.GetWallets(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 	return wallets, nil
 }
 
-func (w *WalletService) GetWalletByID(walletID int64, userID int64) (models.Wallet, error) {
-	wallet, err := w.repo.GetWalletByID(walletID, userID)
+func (w *WalletService) GetWalletByID(ctx context.Context, walletID int64, userID int64) (models.Wallet, error) {
+	wallet, err := w.repo.GetWalletByID(ctx, walletID, userID)
 	if err != nil {
 		return models.Wallet{}, err
 	}
@@ -76,8 +77,8 @@ func (w *WalletService) GetWalletByID(walletID int64, userID int64) (models.Wall
 	return wallet, nil
 }
 
-func (w *WalletService) UpdateWallet(walletID int64, userID int64, name string) (models.Wallet, error) {
-	updatedWallet, err := w.repo.UpdateWallet(walletID, userID, name)
+func (w *WalletService) UpdateWallet(ctx context.Context, walletID int64, userID int64, name string) (models.Wallet, error) {
+	updatedWallet, err := w.repo.UpdateWallet(ctx, walletID, userID, name)
 	if err != nil {
 		return models.Wallet{}, err
 	}
@@ -85,8 +86,8 @@ func (w *WalletService) UpdateWallet(walletID int64, userID int64, name string) 
 	return updatedWallet, nil
 }
 
-func (w *WalletService) DeleteWallet(walletID int64, userID int64) error {
-	err := w.repo.DeleteWallet(walletID, userID)
+func (w *WalletService) DeleteWallet(ctx context.Context, walletID int64, userID int64) error {
+	err := w.repo.DeleteWallet(ctx, walletID, userID)
 	if err != nil {
 		return err
 	}
@@ -94,8 +95,8 @@ func (w *WalletService) DeleteWallet(walletID int64, userID int64) error {
 	return nil
 }
 
-func (w *WalletService) GetAllWallets() ([]models.Wallet, error) {
-	wallets, err := w.repo.GetAllWallets()
+func (w *WalletService) GetAllWallets(ctx context.Context) ([]models.Wallet, error) {
+	wallets, err := w.repo.GetAllWallets(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +104,8 @@ func (w *WalletService) GetAllWallets() ([]models.Wallet, error) {
 	return wallets, nil
 }
 
-func (w *WalletService) GetWalletsByUserID(userID int64) ([]models.Wallet, error) {
-	wallets, err := w.repo.GetWalletsByUserID(userID)
+func (w *WalletService) GetWalletsByUserID(ctx context.Context, userID int64) ([]models.Wallet, error) {
+	wallets, err := w.repo.GetWalletsByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -112,8 +113,8 @@ func (w *WalletService) GetWalletsByUserID(userID int64) ([]models.Wallet, error
 	return wallets, nil
 }
 
-func (w *WalletService) GetWalletByIDForAdmin(walletID int64) (models.Wallet, error) {
-	wallet, err := w.repo.GetWalletByIDForAdmin(walletID)
+func (w *WalletService) GetWalletByIDForAdmin(ctx context.Context, walletID int64) (models.Wallet, error) {
+	wallet, err := w.repo.GetWalletByIDForAdmin(ctx, walletID)
 	if err != nil {
 		return models.Wallet{}, err
 	}

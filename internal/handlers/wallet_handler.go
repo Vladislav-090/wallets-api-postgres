@@ -39,7 +39,7 @@ func (h *WalletHandler) CreateWallet(w http.ResponseWriter, r *http.Request) {
 
 	userID := claims.UserID
 
-	createdWallet, err := h.walletService.CreateWallet(userID, input)
+	createdWallet, err := h.walletService.CreateWallet(r.Context(), userID, input)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrNameRequired):
@@ -63,7 +63,7 @@ func (h *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wallets, err := h.walletService.GetWallets(claims.UserID)
+	wallets, err := h.walletService.GetWallets(r.Context(), claims.UserID)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to get wallets")
 		return
@@ -87,7 +87,7 @@ func (h *WalletHandler) GetWalletByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wallet, err := h.walletService.GetWalletByID(idInt, claims.UserID)
+	wallet, err := h.walletService.GetWalletByID(r.Context(), idInt, claims.UserID)
 	if err != nil {
 		response.WriteError(w, http.StatusNotFound, "wallet not found")
 		return
@@ -124,7 +124,7 @@ func (h *WalletHandler) UpdateWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedWallet, err := h.walletService.UpdateWallet(idInt, claims.UserID, input.Name)
+	updatedWallet, err := h.walletService.UpdateWallet(r.Context(), idInt, claims.UserID, input.Name)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to update wallet")
 		return
@@ -147,7 +147,7 @@ func (h *WalletHandler) DeleteWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.walletService.DeleteWallet(idInt, claims.UserID)
+	err = h.walletService.DeleteWallet(r.Context(), idInt, claims.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			response.WriteError(w, http.StatusNotFound, "wallet not found")
@@ -163,7 +163,7 @@ func (h *WalletHandler) DeleteWallet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *WalletHandler) GetAllWallets(w http.ResponseWriter, r *http.Request) {
-	wallets, err := h.walletService.GetAllWallets()
+	wallets, err := h.walletService.GetAllWallets(r.Context())
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to get wallets")
 		return
@@ -182,7 +182,7 @@ func (h *WalletHandler) GetWalletsByUserID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	wallets, err := h.walletService.GetWalletsByUserID(userID)
+	wallets, err := h.walletService.GetWalletsByUserID(r.Context(), userID)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to get wallets")
 		return
@@ -201,7 +201,7 @@ func (h *WalletHandler) GetWalletByIDForAdmin(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	wallet, err := h.walletService.GetWalletByIDForAdmin(walletID)
+	wallet, err := h.walletService.GetWalletByIDForAdmin(r.Context(), walletID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			response.WriteError(w, http.StatusNotFound, "wallet not found")

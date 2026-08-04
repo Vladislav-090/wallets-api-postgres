@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"wallets-api-postgres/internal/models"
 )
@@ -15,12 +16,19 @@ func NewWalletRepository(db *sql.DB) *WalletRepository {
 	}
 }
 
-func (w *WalletRepository) CreateWallet(wallet models.Wallet) (models.Wallet, error) {
+func (w *WalletRepository) CreateWallet(ctx context.Context, wallet models.Wallet) (models.Wallet, error) {
 	query := `INSERT INTO wallets (user_id, name, currency, balance)
 	VALUES ($1, $2, $3, $4)
 	RETURNING id, user_id, name, currency, balance, created_at, updated_at`
 
-	err := w.db.QueryRow(query, wallet.UserID, wallet.Name, wallet.Currency, wallet.Balance).Scan(
+	err := w.db.QueryRowContext(
+		ctx,
+		query,
+		wallet.UserID,
+		wallet.Name,
+		wallet.Currency,
+		wallet.Balance,
+	).Scan(
 		&wallet.ID,
 		&wallet.UserID,
 		&wallet.Name,
@@ -37,13 +45,13 @@ func (w *WalletRepository) CreateWallet(wallet models.Wallet) (models.Wallet, er
 	return wallet, nil
 }
 
-func (w *WalletRepository) GetWallets(userID int64) ([]models.Wallet, error) {
+func (w *WalletRepository) GetWallets(ctx context.Context, userID int64) ([]models.Wallet, error) {
 	query := `SELECT id, user_id, name, currency, balance, created_at, updated_at
 	FROM wallets
 	WHERE user_id = $1
 	ORDER BY created_at DESC`
 
-	rows, err := w.db.Query(query, userID)
+	rows, err := w.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,14 +85,16 @@ func (w *WalletRepository) GetWallets(userID int64) ([]models.Wallet, error) {
 	return wallets, nil
 }
 
-func (w *WalletRepository) GetWalletByID(walletID int64, userID int64) (models.Wallet, error) {
+func (w *WalletRepository) GetWalletByID(ctx context.Context, walletID int64, userID int64) (models.Wallet, error) {
 	query := `SELECT id, user_id, name, currency, balance, created_at, updated_at
 	FROM wallets
 	WHERE id = $1 AND user_id = $2`
 
 	var wallet models.Wallet
 
-	err := w.db.QueryRow(query,
+	err := w.db.QueryRowContext(
+		ctx,
+		query,
 		walletID,
 		userID,
 	).Scan(
@@ -104,7 +114,7 @@ func (w *WalletRepository) GetWalletByID(walletID int64, userID int64) (models.W
 	return wallet, nil
 }
 
-func (w *WalletRepository) UpdateWallet(walletID int64, userID int64, name string) (models.Wallet, error) {
+func (w *WalletRepository) UpdateWallet(ctx context.Context, walletID int64, userID int64, name string) (models.Wallet, error) {
 	query := `
 	UPDATE wallets
 	SET name = $1,
@@ -114,7 +124,9 @@ func (w *WalletRepository) UpdateWallet(walletID int64, userID int64, name strin
 
 	var wallet models.Wallet
 
-	err := w.db.QueryRow(query,
+	err := w.db.QueryRowContext(
+		ctx,
+		query,
 		name,
 		walletID,
 		userID,
@@ -135,12 +147,12 @@ func (w *WalletRepository) UpdateWallet(walletID int64, userID int64, name strin
 	return wallet, nil
 }
 
-func (w *WalletRepository) DeleteWallet(walletID int64, userID int64) error {
+func (w *WalletRepository) DeleteWallet(ctx context.Context, walletID int64, userID int64) error {
 	query := `
 	DELETE FROM wallets
 	WHERE id = $1 AND user_id = $2
 	`
-	result, err := w.db.Exec(query, walletID, userID)
+	result, err := w.db.ExecContext(ctx, query, walletID, userID)
 	if err != nil {
 		return err
 	}
@@ -157,13 +169,13 @@ func (w *WalletRepository) DeleteWallet(walletID int64, userID int64) error {
 	return nil
 }
 
-func (w *WalletRepository) GetAllWallets() ([]models.Wallet, error) {
+func (w *WalletRepository) GetAllWallets(ctx context.Context) ([]models.Wallet, error) {
 	query := `
 	SELECT 	id, user_id, name, currency, balance, created_at, updated_at
 	FROM wallets
 	ORDER BY user_id ASC, created_at DESC`
 
-	rows, err := w.db.Query(query)
+	rows, err := w.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -194,14 +206,14 @@ func (w *WalletRepository) GetAllWallets() ([]models.Wallet, error) {
 	return wallets, nil
 }
 
-func (w *WalletRepository) GetWalletsByUserID(userID int64) ([]models.Wallet, error) {
+func (w *WalletRepository) GetWalletsByUserID(ctx context.Context, userID int64) ([]models.Wallet, error) {
 	query := `
 	SELECT id, user_id, name, currency, balance, created_at, updated_at
 	FROM wallets
 	WHERE user_id = $1
 	ORDER BY created_at DESC`
 
-	rows, err := w.db.Query(query, userID)
+	rows, err := w.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +247,7 @@ func (w *WalletRepository) GetWalletsByUserID(userID int64) ([]models.Wallet, er
 	return wallets, nil
 }
 
-func (w *WalletRepository) GetWalletByIDForAdmin(walletID int64) (models.Wallet, error) {
+func (w *WalletRepository) GetWalletByIDForAdmin(ctx context.Context, walletID int64) (models.Wallet, error) {
 	query := `
 	SELECT id, user_id, name, currency, balance, created_at, updated_at
 	FROM wallets
@@ -243,7 +255,9 @@ func (w *WalletRepository) GetWalletByIDForAdmin(walletID int64) (models.Wallet,
 
 	var wallet models.Wallet
 
-	err := w.db.QueryRow(query,
+	err := w.db.QueryRowContext(
+		ctx,
+		query,
 		walletID,
 	).Scan(
 		&wallet.ID,

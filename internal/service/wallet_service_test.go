@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"wallets-api-postgres/internal/models"
@@ -13,38 +14,38 @@ type fakeWalletRepository struct {
 	createWalletError  error
 }
 
-func (f *fakeWalletRepository) CreateWallet(wallet models.Wallet) (models.Wallet, error) {
+func (f *fakeWalletRepository) CreateWallet(ctx context.Context, wallet models.Wallet) (models.Wallet, error) {
 	f.createWalletCalled = true
 	f.receivedWallet = wallet
 
 	return f.createWalletResult, f.createWalletError
 }
 
-func (f *fakeWalletRepository) GetWallets(userID int64) ([]models.Wallet, error) {
+func (f *fakeWalletRepository) GetWallets(ctx context.Context, userID int64) ([]models.Wallet, error) {
 	return nil, nil
 }
 
-func (f *fakeWalletRepository) GetWalletByID(walletID int64, userID int64) (models.Wallet, error) {
+func (f *fakeWalletRepository) GetWalletByID(ctx context.Context, walletID int64, userID int64) (models.Wallet, error) {
 	return models.Wallet{}, nil
 }
 
-func (f *fakeWalletRepository) UpdateWallet(walletID int64, userID int64, name string) (models.Wallet, error) {
+func (f *fakeWalletRepository) UpdateWallet(ctx context.Context, walletID int64, userID int64, name string) (models.Wallet, error) {
 	return models.Wallet{}, nil
 }
 
-func (f *fakeWalletRepository) DeleteWallet(walletID int64, userID int64) error {
+func (f *fakeWalletRepository) DeleteWallet(ctx context.Context, walletID int64, userID int64) error {
 	return nil
 }
 
-func (f *fakeWalletRepository) GetAllWallets() ([]models.Wallet, error) {
+func (f *fakeWalletRepository) GetAllWallets(ctx context.Context) ([]models.Wallet, error) {
 	return nil, nil
 }
 
-func (f *fakeWalletRepository) GetWalletsByUserID(userID int64) ([]models.Wallet, error) {
+func (f *fakeWalletRepository) GetWalletsByUserID(ctx context.Context, userID int64) ([]models.Wallet, error) {
 	return nil, nil
 }
 
-func (f *fakeWalletRepository) GetWalletByIDForAdmin(walletID int64) (models.Wallet, error) {
+func (f *fakeWalletRepository) GetWalletByIDForAdmin(ctx context.Context, walletID int64) (models.Wallet, error) {
 	return models.Wallet{}, nil
 }
 
@@ -59,7 +60,7 @@ func TestWalletService_CreateWallet_Success(t *testing.T) {
 	}
 	service := NewWalletService(fakeRepo)
 
-	result, err := service.CreateWallet(1, models.WalletInput{
+	result, err := service.CreateWallet(context.Background(), 1, models.WalletInput{
 		Name:     "Main",
 		Currency: "USD",
 	})
@@ -88,7 +89,7 @@ func TestWalletService_CreateWallet_RepositoryError(t *testing.T) {
 
 	service := NewWalletService(fakeRepo)
 
-	_, err := service.CreateWallet(1, models.WalletInput{
+	_, err := service.CreateWallet(context.Background(), 1, models.WalletInput{
 		Name:     "Main",
 		Currency: "USD",
 	})
@@ -129,7 +130,7 @@ func TestWalletService_CreateWallet_Validation(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			fakeRepo := &fakeWalletRepository{}
 			walletService := NewWalletService(fakeRepo)
-			_, err := walletService.CreateWallet(1, test.input)
+			_, err := walletService.CreateWallet(context.Background(), 1, test.input)
 			if !errors.Is(err, test.expectedErr) {
 				t.Fatalf("expected %v, got %v", test.expectedErr, err)
 			}
