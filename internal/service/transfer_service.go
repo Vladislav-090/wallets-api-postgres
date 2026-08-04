@@ -10,10 +10,10 @@ import (
 
 type TransferRepository interface {
 	CreateTransfer(ctx context.Context, userID int64, fromWalletID int64, toWalletID int64, amount decimal.Decimal) (models.Transfer, error)
-	GetTransfers(userID int64) ([]models.Transfer, error)
-	GetTransferByID(transferID int64, userID int64) (models.Transfer, error)
-	GetAllTransfers() ([]models.Transfer, error)
-	GetTransferByIDForAdmin(transferID int64) (models.Transfer, error)
+	GetTransfers(ctx context.Context, userID int64) ([]models.Transfer, error)
+	GetTransferByID(ctx context.Context, transferID int64, userID int64) (models.Transfer, error)
+	GetAllTransfers(ctx context.Context) ([]models.Transfer, error)
+	GetTransferByIDForAdmin(ctx context.Context, transferID int64) (models.Transfer, error)
 }
 
 type TransferService struct {
@@ -70,18 +70,18 @@ func (s *TransferService) CreateTransfer(
 	)
 }
 
-func (s *TransferService) GetTransfers(userID int64) ([]models.Transfer, error) {
-	return s.transferRepository.GetTransfers(userID)
+func (s *TransferService) GetTransfers(ctx context.Context, userID int64) ([]models.Transfer, error) {
+	return s.transferRepository.GetTransfers(ctx, userID)
 }
 
-func (s *TransferService) GetTransferByID(transferID int64, userID int64) (models.Transfer, error) {
-	return s.transferRepository.GetTransferByID(transferID, userID)
+func (s *TransferService) GetTransferByID(ctx context.Context, transferID int64, userID int64) (models.Transfer, error) {
+	return s.transferRepository.GetTransferByID(ctx, transferID, userID)
 }
 
-func (s *TransferService) GetAllTransfers() ([]models.Transfer, error) {
-	return s.transferRepository.GetAllTransfers()
+func (s *TransferService) GetAllTransfers(ctx context.Context) ([]models.Transfer, error) {
+	return s.transferRepository.GetAllTransfers(ctx)
 }
 
-func (s *TransferService) GetTransferByIDForAdmin(transferID int64) (models.Transfer, error) {
-	return s.transferRepository.GetTransferByIDForAdmin(transferID)
+func (s *TransferService) GetTransferByIDForAdmin(ctx context.Context, transferID int64) (models.Transfer, error) {
+	return s.transferRepository.GetTransferByIDForAdmin(ctx, transferID)
 }

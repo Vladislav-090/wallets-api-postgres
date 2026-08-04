@@ -36,19 +36,19 @@ func (f *fakeTransferRepository) CreateTransfer(
 	return f.createTransferResult, f.createTransferError
 }
 
-func (f *fakeTransferRepository) GetTransfers(userID int64) ([]models.Transfer, error) {
+func (f *fakeTransferRepository) GetTransfers(ctx context.Context, userID int64) ([]models.Transfer, error) {
 	return nil, nil
 }
 
-func (f *fakeTransferRepository) GetTransferByID(transferID int64, userID int64) (models.Transfer, error) {
+func (f *fakeTransferRepository) GetTransferByID(ctx context.Context, transferID int64, userID int64) (models.Transfer, error) {
 	return models.Transfer{}, nil
 }
 
-func (f *fakeTransferRepository) GetAllTransfers() ([]models.Transfer, error) {
+func (f *fakeTransferRepository) GetAllTransfers(ctx context.Context) ([]models.Transfer, error) {
 	return []models.Transfer{}, nil
 }
 
-func (f *fakeTransferRepository) GetTransferByIDForAdmin(transferID int64) (models.Transfer, error) {
+func (f *fakeTransferRepository) GetTransferByIDForAdmin(ctx context.Context, transferID int64) (models.Transfer, error) {
 	return models.Transfer{}, nil
 }
 

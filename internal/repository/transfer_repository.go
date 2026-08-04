@@ -154,7 +154,7 @@ func (t *TransferRepository) CreateTransfer(
 	return transfer, nil
 }
 
-func (t *TransferRepository) GetTransfers(userID int64) ([]models.Transfer, error) {
+func (t *TransferRepository) GetTransfers(ctx context.Context, userID int64) ([]models.Transfer, error) {
 	query := `
 	SELECT
 	tr.id,
@@ -171,7 +171,7 @@ func (t *TransferRepository) GetTransfers(userID int64) ([]models.Transfer, erro
 	WHERE fw.user_id = $1 OR tw.user_id = $1
 	ORDER BY tr.created_at  DESC`
 
-	rows, err := t.db.Query(query, userID)
+	rows, err := t.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (t *TransferRepository) GetTransfers(userID int64) ([]models.Transfer, erro
 	return transfers, nil
 }
 
-func (t *TransferRepository) GetTransferByID(transferID int64, userID int64) (models.Transfer, error) {
+func (t *TransferRepository) GetTransferByID(ctx context.Context, transferID int64, userID int64) (models.Transfer, error) {
 	query := `SELECT
 	tr.id,
 	tr.from_wallet_id,
@@ -220,7 +220,7 @@ func (t *TransferRepository) GetTransferByID(transferID int64, userID int64) (mo
 	`
 	var transfer models.Transfer
 
-	err := t.db.QueryRow(query, transferID, userID).Scan(
+	err := t.db.QueryRowContext(ctx, query, transferID, userID).Scan(
 		&transfer.ID,
 		&transfer.FromWalletID,
 		&transfer.ToWalletID,
@@ -235,13 +235,13 @@ func (t *TransferRepository) GetTransferByID(transferID int64, userID int64) (mo
 	return transfer, nil
 }
 
-func (t *TransferRepository) GetAllTransfers() ([]models.Transfer, error) {
+func (t *TransferRepository) GetAllTransfers(ctx context.Context) ([]models.Transfer, error) {
 	query := `
 	SELECT id, from_wallet_id, to_wallet_id, amount, status, created_at
 	FROM transfers
 	ORDER BY created_at DESC`
 
-	rows, err := t.db.Query(query)
+	rows, err := t.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +273,7 @@ func (t *TransferRepository) GetAllTransfers() ([]models.Transfer, error) {
 
 }
 
-func (t *TransferRepository) GetTransferByIDForAdmin(transferID int64) (models.Transfer, error) {
+func (t *TransferRepository) GetTransferByIDForAdmin(ctx context.Context, transferID int64) (models.Transfer, error) {
 	query := `
 	SELECT id, from_wallet_id, to_wallet_id, amount, status, created_at
 	FROM transfers
@@ -282,7 +282,7 @@ func (t *TransferRepository) GetTransferByIDForAdmin(transferID int64) (models.T
 
 	var transfer models.Transfer
 
-	err := t.db.QueryRow(query, transferID).Scan(
+	err := t.db.QueryRowContext(ctx, query, transferID).Scan(
 		&transfer.ID,
 		&transfer.FromWalletID,
 		&transfer.ToWalletID,

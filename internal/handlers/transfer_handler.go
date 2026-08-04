@@ -90,7 +90,7 @@ func (h *TransferHandler) GetTransfers(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusUnauthorized, "failed to get userID")
 		return
 	}
-	transfers, err := h.transferService.GetTransfers(claims.UserID)
+	transfers, err := h.transferService.GetTransfers(r.Context(), claims.UserID)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to get transfers")
 		return
@@ -114,7 +114,7 @@ func (h *TransferHandler) GetTransferByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	transfer, err := h.transferService.GetTransferByID(idInt, claims.UserID)
+	transfer, err := h.transferService.GetTransferByID(r.Context(), idInt, claims.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			response.WriteError(w, http.StatusNotFound, "transfer not found")
@@ -129,7 +129,7 @@ func (h *TransferHandler) GetTransferByID(w http.ResponseWriter, r *http.Request
 }
 
 func (h *TransferHandler) GetAllTransfers(w http.ResponseWriter, r *http.Request) {
-	transfers, err := h.transferService.GetAllTransfers()
+	transfers, err := h.transferService.GetAllTransfers(r.Context())
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to get transfers")
 		return
@@ -146,7 +146,7 @@ func (h *TransferHandler) GetTransferByIDForAdmin(w http.ResponseWriter, r *http
 		return
 	}
 
-	transfer, err := h.transferService.GetTransferByIDForAdmin(transferID)
+	transfer, err := h.transferService.GetTransferByIDForAdmin(r.Context(), transferID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			response.WriteError(w, http.StatusNotFound, "transfer not found")
