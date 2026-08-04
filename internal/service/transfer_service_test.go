@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"wallets-api-postgres/internal/models"
@@ -20,6 +21,7 @@ type fakeTransferRepository struct {
 }
 
 func (f *fakeTransferRepository) CreateTransfer(
+	ctx context.Context,
 	userID int64,
 	fromWalletID int64,
 	toWalletID int64,
@@ -111,6 +113,7 @@ func TestTransferService_CreateTransfer_Validation(t *testing.T) {
 			service := NewTransferService(fakeRepo)
 
 			_, err := service.CreateTransfer(
+				context.Background(),
 				test.userID,
 				test.fromWalletID,
 				test.toWalletID,
@@ -148,6 +151,7 @@ func TestTransferService_CreateTransfer_Success(t *testing.T) {
 	amount := decimal.RequireFromString("1000.00")
 
 	actualTransfer, err := service.CreateTransfer(
+		context.Background(),
 		userID,
 		fromWalletID,
 		toWalletID,
@@ -207,6 +211,7 @@ func TestTransferService_CreateTransfer_RepositoryError(t *testing.T) {
 	service := NewTransferService(fakeRepo)
 
 	_, err := service.CreateTransfer(
+		context.Background(),
 		1,
 		2,
 		3,

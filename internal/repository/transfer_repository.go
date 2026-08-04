@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"wallets-api-postgres/internal/models"
@@ -25,12 +26,14 @@ var (
 	ErrTooSmallBalance   = errors.New("dont have enough money")
 )
 
-func (t *TransferRepository) CreateTransfer(userID int64,
+func (t *TransferRepository) CreateTransfer(
+	ctx context.Context,
+	userID int64,
 	fromWalletID int64,
 	toWalletID int64,
 	amount decimal.Decimal,
 ) (models.Transfer, error) {
-	tx, err := t.db.Begin()
+	tx, err := t.db.BeginTx(ctx, nil)
 	if err != nil {
 		return models.Transfer{}, err
 	}
@@ -45,7 +48,7 @@ func (t *TransferRepository) CreateTransfer(userID int64,
 	WHERE id = $1 AND user_id = $2
 	FOR UPDATE`
 
-	err = tx.QueryRow(query, fromWalletID, userID).Scan(
+	err = tx.QueryRowContext(ctx, query, fromWalletID, userID).Scan(
 		&fromBalance,
 		&fromCurrency,
 	)
@@ -61,7 +64,7 @@ func (t *TransferRepository) CreateTransfer(userID int64,
 	WHERE id = $1
 	FOR UPDATE`
 
-	err = tx.QueryRow(toQuery, toWalletID).Scan(
+	err = tx.QueryRowContext(ctx, toQuery, toWalletID).Scan(
 		&toCurrency,
 	)
 	if err != nil {
@@ -90,7 +93,7 @@ func (t *TransferRepository) CreateTransfer(userID int64,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE id = $2`
 
-	_, err = tx.Exec(debitQuery, amount, fromWalletID)
+	_, err = tx.ExecContext(ctx, debitQuery, amount, fromWalletID)
 	if err != nil {
 		return models.Transfer{}, err
 	}
@@ -101,7 +104,7 @@ func (t *TransferRepository) CreateTransfer(userID int64,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE id = $2`
 
-	_, err = tx.Exec(creditQuery, amount, toWalletID)
+	_, err = tx.ExecContext(ctx, creditQuery, amount, toWalletID)
 	if err != nil {
 		return models.Transfer{}, err
 	}
@@ -124,7 +127,8 @@ func (t *TransferRepository) CreateTransfer(userID int64,
 	 status,
 	 created_at`
 
-	err = tx.QueryRow(
+	err = tx.QueryRowContext(
+		ctx,
 		transferQuery,
 		fromWalletID,
 		toWalletID,

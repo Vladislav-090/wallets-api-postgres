@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"wallets-api-postgres/internal/models"
 
@@ -8,7 +9,7 @@ import (
 )
 
 type TransferRepository interface {
-	CreateTransfer(userID int64, fromWalletID int64, toWalletID int64, amount decimal.Decimal) (models.Transfer, error)
+	CreateTransfer(ctx context.Context, userID int64, fromWalletID int64, toWalletID int64, amount decimal.Decimal) (models.Transfer, error)
 	GetTransfers(userID int64) ([]models.Transfer, error)
 	GetTransferByID(transferID int64, userID int64) (models.Transfer, error)
 	GetAllTransfers() ([]models.Transfer, error)
@@ -34,6 +35,7 @@ var (
 )
 
 func (s *TransferService) CreateTransfer(
+	ctx context.Context,
 	userID int64,
 	fromWalletID int64,
 	toWalletID int64,
@@ -60,6 +62,7 @@ func (s *TransferService) CreateTransfer(
 	}
 
 	return s.transferRepository.CreateTransfer(
+		ctx,
 		userID,
 		fromWalletID,
 		toWalletID,

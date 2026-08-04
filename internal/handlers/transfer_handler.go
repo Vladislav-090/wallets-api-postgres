@@ -56,6 +56,7 @@ func (h *TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request)
 	}
 
 	transfer, err := h.transferService.CreateTransfer(
+		r.Context(),
 		claims.UserID,
 		input.FromWalletID,
 		input.ToWalletID,
