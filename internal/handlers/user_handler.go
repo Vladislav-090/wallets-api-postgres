@@ -30,7 +30,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdUser, err := h.userService.CreateUser(input)
+	createdUser, err := h.userService.CreateUser(r.Context(), input)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrEmailRequired):
@@ -60,7 +60,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := h.userService.Login(input)
+	tokenString, err := h.userService.Login(r.Context(), input)
 	if errors.Is(err, service.ErrInvalidCredentials) {
 		response.WriteError(w, http.StatusUnauthorized, "invalid email or password")
 		return
@@ -76,7 +76,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.userService.GetUsers()
+	users, err := h.userService.GetUsers(r.Context())
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to get users")
 		return
@@ -93,7 +93,7 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userService.GetUserByID(userID)
+	user, err := h.userService.GetUserByID(r.Context(), userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			response.WriteError(w, http.StatusNotFound, "user not found")

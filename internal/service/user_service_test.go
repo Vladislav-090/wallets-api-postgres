@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"testing"
@@ -28,24 +29,24 @@ type fakeUserRepository struct {
 	getUsersCalled bool
 }
 
-func (f *fakeUserRepository) GetUserByEmail(userEmail string) (models.User, error) {
+func (f *fakeUserRepository) GetUserByEmail(ctx context.Context, userEmail string) (models.User, error) {
 	f.getUserByEmailCalled = true
 	return f.getUserByEmailResult, f.getUserByEmailError
 }
 
-func (f *fakeUserRepository) CreateUser(user models.User) (models.User, error) {
+func (f *fakeUserRepository) CreateUser(ctx context.Context, user models.User) (models.User, error) {
 	f.createUserCalled = true
 	f.receivedUser = user
 
 	return f.createUserResult, f.createUserError
 }
 
-func (f *fakeUserRepository) GetUserByID(userID int64) (models.User, error) {
+func (f *fakeUserRepository) GetUserByID(ctx context.Context, userID int64) (models.User, error) {
 	f.getUserByIDCalled = true
 	return f.getUserByIDResult, f.getUserByIDError
 }
 
-func (f *fakeUserRepository) GetUsers() ([]models.User, error) {
+func (f *fakeUserRepository) GetUsers(ctx context.Context) ([]models.User, error) {
 	f.getUsersCalled = true
 	return f.getUsersResult, f.getUsersError
 }
@@ -83,7 +84,7 @@ func TestUserService_CreateUser_Validation(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			fakeRepo := &fakeUserRepository{}
 			userService := NewUserService(fakeRepo, "test-secret")
-			_, err := userService.CreateUser(test.input)
+			_, err := userService.CreateUser(context.Background(), test.input)
 			if !errors.Is(err, test.expectedError) {
 				t.Fatalf("expected %v, got %v", test.expectedError, err)
 			}
@@ -108,7 +109,7 @@ func TestUserService_CreateUser_RepositoryError(t *testing.T) {
 		Email:    "test12345@gmail.com",
 		Password: "password123",
 	}
-	_, err := service.CreateUser(input)
+	_, err := service.CreateUser(context.Background(), input)
 
 	if !errors.Is(err, repErr) {
 		t.Fatalf("expected %v, got %v", repErr, err)
@@ -132,7 +133,7 @@ func TestUserService_CreateUser_EmailAlreadyExists(t *testing.T) {
 		Password: "password123",
 	}
 
-	_, err := service.CreateUser(input)
+	_, err := service.CreateUser(context.Background(), input)
 	if !errors.Is(err, ErrEmailAlreadyExists) {
 		t.Fatalf("expected %v, got %v", ErrEmailAlreadyExists, err)
 	}
@@ -156,7 +157,7 @@ func TestUserService_CreateUser_GetUserByEmailError(t *testing.T) {
 		Password: "password123",
 	}
 
-	_, err := service.CreateUser(input)
+	_, err := service.CreateUser(context.Background(), input)
 	if !errors.Is(err, repErr) {
 		t.Fatalf("expected %v, got %v", repErr, err)
 	}
@@ -181,7 +182,7 @@ func TestUserService_CreateUser_Success(t *testing.T) {
 		Password: "password123",
 	}
 
-	createdUser, err := service.CreateUser(input)
+	createdUser, err := service.CreateUser(context.Background(), input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -239,7 +240,7 @@ func TestUserService_Login_Validation(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			fakeRepo := &fakeUserRepository{}
 			service := NewUserService(fakeRepo, "test-secret")
-			_, err := service.Login(test.input)
+			_, err := service.Login(context.Background(), test.input)
 			if !errors.Is(err, test.expectedError) {
 				t.Fatalf("expected %v, got %v", test.expectedError, err)
 			}
@@ -262,7 +263,7 @@ func TestUserService_Login_UserNotFound(t *testing.T) {
 		Password: "password123",
 	}
 
-	_, err := service.Login(input)
+	_, err := service.Login(context.Background(), input)
 	if !errors.Is(err, ErrInvalidCredentials) {
 		t.Fatalf("expected %v, got %v", ErrInvalidCredentials, err)
 	}
@@ -284,7 +285,7 @@ func TestUserService_Login_GetUserByEmailError(t *testing.T) {
 		Password: "password123",
 	}
 
-	_, err := service.Login(input)
+	_, err := service.Login(context.Background(), input)
 	if !errors.Is(err, repoErr) {
 		t.Fatalf("expected %v, got %v", repoErr, err)
 	}
@@ -319,7 +320,7 @@ func TestUserService_Login_InvalidPassword(t *testing.T) {
 		Password: "wrong-password",
 	}
 
-	token, err := service.Login(input)
+	token, err := service.Login(context.Background(), input)
 	if token != "" {
 		t.Fatalf("expected empty token, got %s", token)
 	}
@@ -356,7 +357,7 @@ func TestUserService_Login_Success(t *testing.T) {
 		Password: "password123",
 	}
 
-	token, err := service.Login(input)
+	token, err := service.Login(context.Background(), input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -380,7 +381,7 @@ func TestUserService_GetUserByID_RepositoryError(t *testing.T) {
 
 	userID := int64(1)
 
-	_, err := service.GetUserByID(userID)
+	_, err := service.GetUserByID(context.Background(), userID)
 	if !errors.Is(err, repoErr) {
 		t.Fatalf("expected %v, got %v", repoErr, err)
 	}
@@ -403,7 +404,7 @@ func TestUserService_GetUserByID_Success(t *testing.T) {
 
 	service := NewUserService(fakeRepo, "test-secret")
 
-	actualUser, err := service.GetUserByID(1)
+	actualUser, err := service.GetUserByID(context.Background(), 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -433,7 +434,7 @@ func TestUserService_GetUsers_RepositoryError(t *testing.T) {
 
 	service := NewUserService(fakeRepo, "test-secret")
 
-	_, err := service.GetUsers()
+	_, err := service.GetUsers(context.Background())
 	if !errors.Is(err, repErr) {
 		t.Fatalf("expected %v, got %v", repErr, err)
 	}
@@ -463,7 +464,7 @@ func TestUserService_GetUsers_Success(t *testing.T) {
 
 	service := NewUserService(fakeRepo, "test-secret")
 
-	actualUsers, err := service.GetUsers()
+	actualUsers, err := service.GetUsers(context.Background())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

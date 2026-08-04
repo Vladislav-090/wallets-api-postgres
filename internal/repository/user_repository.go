@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"wallets-api-postgres/internal/models"
 )
@@ -15,13 +16,13 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	}
 }
 
-func (u *UserRepository) CreateUser(user models.User) (models.User, error) {
+func (u *UserRepository) CreateUser(ctx context.Context, user models.User) (models.User, error) {
 	query := `
 	INSERT INTO users (email, password_hash, role)
 	VALUES ($1, $2, $3)
 	RETURNING id, email, password_hash, role, created_at, updated_at`
 
-	err := u.db.QueryRow(query, user.Email, user.PasswordHash, user.Role).Scan(
+	err := u.db.QueryRowContext(ctx, query, user.Email, user.PasswordHash, user.Role).Scan(
 		&user.ID,
 		&user.Email,
 		&user.PasswordHash,
@@ -36,7 +37,7 @@ func (u *UserRepository) CreateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (u *UserRepository) GetUserByEmail(email string) (models.User, error) {
+func (u *UserRepository) GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 	var user models.User
 
 	query := `
@@ -45,7 +46,7 @@ func (u *UserRepository) GetUserByEmail(email string) (models.User, error) {
 	WHERE email = $1
 `
 
-	err := u.db.QueryRow(query, email).Scan(
+	err := u.db.QueryRowContext(ctx, query, email).Scan(
 		&user.ID,
 		&user.Email,
 		&user.PasswordHash,
@@ -61,13 +62,13 @@ func (u *UserRepository) GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-func (u *UserRepository) GetUsers() ([]models.User, error) {
+func (u *UserRepository) GetUsers(ctx context.Context) ([]models.User, error) {
 	query := `
 	SELECT id, email, role, created_at, updated_at
 	FROM users
 	ORDER BY created_at DESC`
 
-	rows, err := u.db.Query(query)
+	rows, err := u.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +98,7 @@ func (u *UserRepository) GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func (u *UserRepository) GetUserByID(userID int64) (models.User, error) {
+func (u *UserRepository) GetUserByID(ctx context.Context, userID int64) (models.User, error) {
 	query := `
 	SELECT id, email, role, created_at, updated_at
 	FROM users
@@ -105,7 +106,7 @@ func (u *UserRepository) GetUserByID(userID int64) (models.User, error) {
 	`
 	var user models.User
 
-	err := u.db.QueryRow(query, userID).Scan(
+	err := u.db.QueryRowContext(ctx, query, userID).Scan(
 		&user.ID,
 		&user.Email,
 		&user.Role,

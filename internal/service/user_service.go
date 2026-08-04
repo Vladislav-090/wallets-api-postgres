@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"wallets-api-postgres/internal/auth"
@@ -18,10 +19,10 @@ var (
 )
 
 type UserRepository interface {
-	CreateUser(user models.User) (models.User, error)
-	GetUsers() ([]models.User, error)
-	GetUserByID(userID int64) (models.User, error)
-	GetUserByEmail(userEmail string) (models.User, error)
+	CreateUser(ctx context.Context, user models.User) (models.User, error)
+	GetUsers(ctx context.Context) ([]models.User, error)
+	GetUserByID(ctx context.Context, userID int64) (models.User, error)
+	GetUserByEmail(ctx context.Context, userEmail string) (models.User, error)
 }
 
 type UserService struct {
@@ -38,7 +39,7 @@ func NewUserService(userRepository UserRepository,
 	}
 }
 
-func (s *UserService) CreateUser(input models.RegisterInput) (*models.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, input models.RegisterInput) (*models.User, error) {
 	if input.Email == "" {
 		return nil, ErrEmailRequired
 	}
@@ -51,7 +52,7 @@ func (s *UserService) CreateUser(input models.RegisterInput) (*models.User, erro
 		return nil, ErrPasswordTooShort
 	}
 
-	_, err := s.userRepository.GetUserByEmail(input.Email)
+	_, err := s.userRepository.GetUserByEmail(ctx, input.Email)
 	if err == nil {
 		return nil, ErrEmailAlreadyExists
 	}
@@ -70,7 +71,7 @@ func (s *UserService) CreateUser(input models.RegisterInput) (*models.User, erro
 		Role:         "user",
 	}
 
-	createdUser, err := s.userRepository.CreateUser(user)
+	createdUser, err := s.userRepository.CreateUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func (s *UserService) CreateUser(input models.RegisterInput) (*models.User, erro
 	return &createdUser, nil
 }
 
-func (u *UserService) Login(loginInput models.LoginInput) (string, error) {
+func (u *UserService) Login(ctx context.Context, loginInput models.LoginInput) (string, error) {
 	if loginInput.Email == "" {
 		return "", ErrInvalidCredentials
 	}
@@ -87,7 +88,7 @@ func (u *UserService) Login(loginInput models.LoginInput) (string, error) {
 		return "", ErrInvalidCredentials
 	}
 
-	user, err := u.userRepository.GetUserByEmail(loginInput.Email)
+	user, err := u.userRepository.GetUserByEmail(ctx, loginInput.Email)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", ErrInvalidCredentials
 	}
@@ -113,10 +114,10 @@ func (u *UserService) Login(loginInput models.LoginInput) (string, error) {
 
 }
 
-func (u *UserService) GetUsers() ([]models.User, error) {
-	return u.userRepository.GetUsers()
+func (u *UserService) GetUsers(ctx context.Context) ([]models.User, error) {
+	return u.userRepository.GetUsers(ctx)
 }
 
-func (u *UserService) GetUserByID(userID int64) (models.User, error) {
-	return u.userRepository.GetUserByID(userID)
+func (u *UserService) GetUserByID(ctx context.Context, userID int64) (models.User, error) {
+	return u.userRepository.GetUserByID(ctx, userID)
 }
