@@ -19,5 +19,7 @@ func New(userHandler *handlers.UserHandler,
 	WalletRouterRegister(mux, walletHandler, secret)
 	TransferRouterRegister(mux, transferHandler, secret)
 
-	return middleware.LoggingMiddleware(mux)
+	return middleware.LoggingMiddleware(
+		middleware.RecoveryMiddleware(mux),
+	)
 }
