@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"wallets-api-postgres/internal/handlers"
+	"wallets-api-postgres/internal/middleware"
 )
 
 func New(userHandler *handlers.UserHandler,
@@ -18,5 +19,5 @@ func New(userHandler *handlers.UserHandler,
 	WalletRouterRegister(mux, walletHandler, secret)
 	TransferRouterRegister(mux, transferHandler, secret)
 
-	return mux
+	return middleware.LoggingMiddleware(mux)
 }
