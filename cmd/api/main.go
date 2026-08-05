@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"wallets-api-postgres/internal/config"
 	"wallets-api-postgres/internal/database"
 	"wallets-api-postgres/internal/handlers"
@@ -13,14 +14,29 @@ import (
 
 func main() {
 
+	logger := slog.New(
+		slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		}),
+	)
+	slog.SetDefault(logger)
+
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal(err)
+		slog.Error(
+			"failed to load config",
+			"error", err,
+		)
+		os.Exit(1)
 	}
 
 	db, err := database.Connect(cfg.Database)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error(
+			"failed to connect to database",
+			"error", err,
+		)
+		os.Exit(1)
 	}
 	defer db.Close()
 
@@ -45,9 +61,16 @@ func main() {
 
 	address := ":" + cfg.Server.Port
 
-	log.Println("server started on port", cfg.Server.Port)
+	slog.Info(
+		"server started",
+		"port", cfg.Server.Port,
+	)
 
 	if err := http.ListenAndServe(address, appRouter); err != nil {
-		log.Fatal(err)
+		slog.Error(
+			"server stopped",
+			"error", err,
+		)
+		os.Exit(1)
 	}
 }
