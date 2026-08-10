@@ -22,6 +22,19 @@ func NewWalletHandler(service *service.WalletService) *WalletHandler {
 	}
 }
 
+
+// @Summary Create Wallet
+// @Description Creates a wallet for the authenticated user
+// @Tags wallets
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param input body models.WalletInput true "Wallet data"
+// @Success 201 {object} models.Wallet
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /wallets [post]
 func (h *WalletHandler) CreateWallet(w http.ResponseWriter, r *http.Request) {
 	var input models.WalletInput
 
@@ -56,6 +69,16 @@ func (h *WalletHandler) CreateWallet(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusCreated, createdWallet)
 }
 
+
+// @Summary Get wallets
+// @Description Returns wallets of the authenticated user
+// @Tags wallets
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Wallet
+// @Failure 401 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /wallets [get]
 func (h *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
 	claims, ok := middleware.GetClaims(r.Context())
 	if !ok {
@@ -72,6 +95,18 @@ func (h *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusOK, wallets)
 }
 
+
+// @Summary Get wallet by ID
+// @Description Returns a wallet of the authenticated user by id
+// @Tags wallets
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Wallet ID"
+// @Success 200 {object} models.Wallet
+// @Failure 401 {object} response.ResponseError
+// @Failure 400 {object} response.ResponseError
+// @Failure 404 {object} response.ResponseError
+// @Router /wallets/{id} [get]
 func (h *WalletHandler) GetWalletByID(w http.ResponseWriter, r *http.Request) {
 	claims, ok := middleware.GetClaims(r.Context())
 	if !ok {
@@ -96,6 +131,19 @@ func (h *WalletHandler) GetWalletByID(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusOK, wallet)
 }
 
+// @Summary Update wallet
+// @Description Update wallet name for the authenticated user
+// @Tags wallets
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Wallet ID"
+// @Param input body models.UpdateWalletInput true "Wallet update data"
+// @Success 200 {object} models.Wallet
+// @Failure 401 {object} response.ResponseError
+// @Failure 400 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /wallets/{id} [patch]
 func (h *WalletHandler) UpdateWallet(w http.ResponseWriter, r *http.Request) {
 	var input models.UpdateWalletInput
 
@@ -132,6 +180,18 @@ func (h *WalletHandler) UpdateWallet(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusOK, updatedWallet)
 }
 
+// @Summary Delete wallet
+// @Description Deletes a wallet of the authenticated user
+// @Tags wallets
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Wallet ID"
+// @Success 200 {object} response.ResponseSuccess
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 404 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /wallets/{id} [delete]
 func (h *WalletHandler) DeleteWallet(w http.ResponseWriter, r *http.Request) {
 	claims, ok := middleware.GetClaims(r.Context())
 	if !ok {
@@ -162,6 +222,16 @@ func (h *WalletHandler) DeleteWallet(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// @Summary Get all wallets
+// @Description Returns all wallets. Admin only.
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Wallet
+// @Failure 401 {object} response.ResponseError
+// @Failure 403 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /admin/wallets [get]
 func (h *WalletHandler) GetAllWallets(w http.ResponseWriter, r *http.Request) {
 	wallets, err := h.walletService.GetAllWallets(r.Context())
 	if err != nil {
@@ -172,6 +242,19 @@ func (h *WalletHandler) GetAllWallets(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusOK, wallets)
 }
 
+
+// @Summary Get wallets by user ID
+// @Description Returns all wallets for a specific user. Admin only.
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 200 {array} models.Wallet
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 403 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /admin/users/{id}/wallets [get]
 func (h *WalletHandler) GetWalletsByUserID(w http.ResponseWriter, r *http.Request) {
 
 	idParam := r.PathValue("id")
@@ -191,6 +274,20 @@ func (h *WalletHandler) GetWalletsByUserID(w http.ResponseWriter, r *http.Reques
 	response.WriteJSON(w, http.StatusOK, wallets)
 }
 
+
+// @Summary Get wallet by ID
+// @Description Returns any wallet by ID. Admin only.
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Wallet ID"
+// @Success 200 {object} models.Wallet
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 403 {object} response.ResponseError
+// @Failure 404 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /admin/wallets/{id} [get]
 func (h *WalletHandler) GetWalletByIDForAdmin(w http.ResponseWriter, r *http.Request) {
 
 	idParam := r.PathValue("id")

@@ -25,6 +25,21 @@ func NewTransferHandler(transferService *service.TransferService) *TransferHandl
 	}
 }
 
+
+// @Summary Create transfer
+// @Description Creates a transfer between wallets of the authenticated user
+// @Tags transfers
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param input body models.TransferInput true "Transfer data"
+// @Success 201 {object} models.Transfer
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 404 {object} response.ResponseError
+// @Failure 409 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /transfers [post]
 func (h *TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request) {
 	claims, ok := middleware.GetClaims(r.Context())
 	if !ok {
@@ -84,6 +99,16 @@ func (h *TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request)
 	response.WriteJSON(w, http.StatusCreated, transfer)
 }
 
+
+// @Summary Get transfers
+// @Description Returns transfers of the authenticated user
+// @Tags transfers
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Transfer
+// @Failure 401 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /transfers [get]
 func (h *TransferHandler) GetTransfers(w http.ResponseWriter, r *http.Request) {
 	claims, ok := middleware.GetClaims(r.Context())
 	if !ok {
@@ -99,6 +124,19 @@ func (h *TransferHandler) GetTransfers(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusOK, transfers)
 }
 
+
+// @Summary Get transfer by ID
+// @Description Returns a transfer of the authenticated user by ID
+// @Tags transfers
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Transfer ID"
+// @Success 200 {object} models.Transfer
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 404 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /transfers/{id} [get]
 func (h *TransferHandler) GetTransferByID(w http.ResponseWriter, r *http.Request) {
 	claims, ok := middleware.GetClaims(r.Context())
 	if !ok {
@@ -128,6 +166,17 @@ func (h *TransferHandler) GetTransferByID(w http.ResponseWriter, r *http.Request
 
 }
 
+
+// @Summary Get all transfers
+// @Description Returns all transfers. Admin only.
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.Transfer
+// @Failure 401 {object} response.ResponseError
+// @Failure 403 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /admin/transfers [get]
 func (h *TransferHandler) GetAllTransfers(w http.ResponseWriter, r *http.Request) {
 	transfers, err := h.transferService.GetAllTransfers(r.Context())
 	if err != nil {
@@ -137,6 +186,20 @@ func (h *TransferHandler) GetAllTransfers(w http.ResponseWriter, r *http.Request
 	response.WriteJSON(w, http.StatusOK, transfers)
 }
 
+
+// @Summary Get transfer by ID
+// @Description Returns any transfer by ID. Admin only.
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Transfer ID"
+// @Success 200 {object} models.Transfer
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 403 {object} response.ResponseError
+// @Failure 404 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /admin/transfers/{id} [get]
 func (h *TransferHandler) GetTransferByIDForAdmin(w http.ResponseWriter, r *http.Request) {
 	idParam := r.PathValue("id")
 

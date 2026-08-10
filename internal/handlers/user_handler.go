@@ -21,6 +21,17 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	}
 }
 
+// @Summary Create user 
+// @Description Registers a new user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param input body models.RegisterInput true "User registration data"
+// @Success 201 {object} models.User
+// @Failure 400 {object} response.ResponseError
+// @Failure 409 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /register [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var input models.RegisterInput
 
@@ -50,6 +61,18 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusCreated, createdUser)
 }
 
+
+// @Summary Login user
+// @Description Authenticates user and returns JWT token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param input body models.LoginInput true "User Login data"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router /login [post]
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	var input models.LoginInput
@@ -75,6 +98,16 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Get users
+// @Description Returns all users
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} models.User
+// @Failure 401 {object} response.ResponseError
+// @Failure 403 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router  /admin/users [get]
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.userService.GetUsers(r.Context())
 	if err != nil {
@@ -85,6 +118,19 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusOK, users)
 }
 
+// @Summary Get user by id
+// @Description Returns a user by ID. Admin only
+// @Tags admin
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 200 {object} models.User
+// @Failure 400 {object} response.ResponseError
+// @Failure 401 {object} response.ResponseError
+// @Failure 403 {object} response.ResponseError
+// @Failure 404 {object} response.ResponseError
+// @Failure 500 {object} response.ResponseError
+// @Router  /admin/users/{id} [get]
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	idParam := r.PathValue("id")
 	userID, err := strconv.ParseInt(idParam, 10, 64)

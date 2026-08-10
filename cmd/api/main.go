@@ -10,7 +10,18 @@ import (
 	"wallets-api-postgres/internal/repository"
 	"wallets-api-postgres/internal/router"
 	"wallets-api-postgres/internal/service"
+	_ "wallets-api-postgres/docs"
 )
+
+// @title Wallets API
+// @version 1.0
+// @description REST API for users, wallets, and transfers.
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 
