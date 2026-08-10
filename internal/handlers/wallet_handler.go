@@ -22,7 +22,6 @@ func NewWalletHandler(service *service.WalletService) *WalletHandler {
 	}
 }
 
-
 // @Summary Create Wallet
 // @Description Creates a wallet for the authenticated user
 // @Tags wallets
@@ -69,7 +68,6 @@ func (h *WalletHandler) CreateWallet(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusCreated, createdWallet)
 }
 
-
 // @Summary Get wallets
 // @Description Returns wallets of the authenticated user
 // @Tags wallets
@@ -94,7 +92,6 @@ func (h *WalletHandler) GetWallets(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteJSON(w, http.StatusOK, wallets)
 }
-
 
 // @Summary Get wallet by ID
 // @Description Returns a wallet of the authenticated user by id
@@ -242,7 +239,6 @@ func (h *WalletHandler) GetAllWallets(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, http.StatusOK, wallets)
 }
 
-
 // @Summary Get wallets by user ID
 // @Description Returns all wallets for a specific user. Admin only.
 // @Tags admin
@@ -273,7 +269,6 @@ func (h *WalletHandler) GetWalletsByUserID(w http.ResponseWriter, r *http.Reques
 
 	response.WriteJSON(w, http.StatusOK, wallets)
 }
-
 
 // @Summary Get wallet by ID
 // @Description Returns any wallet by ID. Admin only.

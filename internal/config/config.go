@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"os"
 )
@@ -30,10 +29,7 @@ type JWTSConfig struct {
 }
 
 func Load() (*Config, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load .env file %w", err)
-	}
+	_ = godotenv.Load()
 
 	cfg := &Config{
 		Server: ServerConfig{
@@ -41,12 +37,12 @@ func Load() (*Config, error) {
 		},
 
 		Database: DataBaseConfig{
-			Host:     "localhost",
+			Host:     os.Getenv("POSTGRES_HOST"),
 			Port:     os.Getenv("POSTGRES_PORT"),
 			User:     os.Getenv("POSTGRES_USER"),
 			Password: os.Getenv("POSTGRES_PASSWORD"),
 			Name:     os.Getenv("POSTGRES_DB"),
-			SSLMode:  "disable",
+			SSLMode:  os.Getenv("POSTGRES_SSLMODE"),
 		},
 
 		JWT: JWTSConfig{

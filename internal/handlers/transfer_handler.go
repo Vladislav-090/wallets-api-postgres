@@ -25,7 +25,6 @@ func NewTransferHandler(transferService *service.TransferService) *TransferHandl
 	}
 }
 
-
 // @Summary Create transfer
 // @Description Creates a transfer between wallets of the authenticated user
 // @Tags transfers
@@ -99,7 +98,6 @@ func (h *TransferHandler) CreateTransfer(w http.ResponseWriter, r *http.Request)
 	response.WriteJSON(w, http.StatusCreated, transfer)
 }
 
-
 // @Summary Get transfers
 // @Description Returns transfers of the authenticated user
 // @Tags transfers
@@ -123,7 +121,6 @@ func (h *TransferHandler) GetTransfers(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteJSON(w, http.StatusOK, transfers)
 }
-
 
 // @Summary Get transfer by ID
 // @Description Returns a transfer of the authenticated user by ID
@@ -166,7 +163,6 @@ func (h *TransferHandler) GetTransferByID(w http.ResponseWriter, r *http.Request
 
 }
 
-
 // @Summary Get all transfers
 // @Description Returns all transfers. Admin only.
 // @Tags admin
@@ -185,7 +181,6 @@ func (h *TransferHandler) GetAllTransfers(w http.ResponseWriter, r *http.Request
 	}
 	response.WriteJSON(w, http.StatusOK, transfers)
 }
-
 
 // @Summary Get transfer by ID
 // @Description Returns any transfer by ID. Admin only.

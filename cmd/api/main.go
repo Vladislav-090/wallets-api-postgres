@@ -4,13 +4,13 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	_ "wallets-api-postgres/docs"
 	"wallets-api-postgres/internal/config"
 	"wallets-api-postgres/internal/database"
 	"wallets-api-postgres/internal/handlers"
 	"wallets-api-postgres/internal/repository"
 	"wallets-api-postgres/internal/router"
 	"wallets-api-postgres/internal/service"
-	_ "wallets-api-postgres/docs"
 )
 
 // @title Wallets API

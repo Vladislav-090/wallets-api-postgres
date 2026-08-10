@@ -21,7 +21,7 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 	}
 }
 
-// @Summary Create user 
+// @Summary Create user
 // @Description Registers a new user
 // @Tags users
 // @Accept json
@@ -60,7 +60,6 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	response.WriteJSON(w, http.StatusCreated, createdUser)
 }
-
 
 // @Summary Login user
 // @Description Authenticates user and returns JWT token
